@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>앨범</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Pacifico&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Iconify (ikon) dari cdnjs. Butuh internet. Cari ikon: https://icon-sets.iconify.design -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/iconify/2.0.0/iconify.min.js"></script>
+<style>
+/* ===== Warna & font ===== */
+:root{--p1:#FFE4EC;--p2:#FFC8DD;--p3:#FFAFCC;--p4:#FFF0F5;--lav:#CDB4DB;--ink:#7a4a63;--deep:#e0709f;
+ --kr:'Gaegu',cursive;--id:'Quicksand',sans-serif;--hd:'Pacifico',cursive;
+ --sec:clamp(40px,9vw,100px) clamp(14px,5vw,28px);
+ --s1:clamp(6px,1.8vw,10px);--s2:clamp(10px,3vw,16px);--s3:clamp(14px,4.2vw,22px);--s4:clamp(20px,6vw,36px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;min-width:0}
+html{scroll-behavior:smooth;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media(min-width:1200px){html{font-size:17px}}
+@media(min-width:1600px){html{font-size:19px}}
+body{font-family:var(--id);color:var(--ink);background:var(--p4);overflow-x:hidden;line-height:1.5;width:100%;
+ background-image:radial-gradient(rgba(255,175,204,.45) 1.5px,transparent 1.5px);background-size:24px 24px}
+body.loading{overflow:hidden}
+img{max-width:100%;display:block}
+.iconify{display:inline-block;vertical-align:-.18em}
+/* overflow-x:clip mencegah animasi geser (kiri/kanan) melebarkan halaman di HP */
+section{position:relative;padding:var(--sec);max-width:1100px;margin:0 auto;z-index:2;overflow-x:clip}
+h2{font-family:var(--hd);font-weight:400;font-size:clamp(1.5rem,6vw,2.4rem);text-align:center;color:var(--deep);margin-bottom:clamp(26px,6vw,50px);text-wrap:balance}
+h2 .iconify{margin:0 6px}
+.kr{font-family:var(--kr);font-weight:700;font-size:clamp(1.35rem,5vw,1.8rem);line-height:1.25;overflow-wrap:anywhere}
+.id{font-size:.88rem;font-style:italic;opacity:.8;margin-top:4px;overflow-wrap:anywhere}
+
+/* ===== Loading screen ===== */
+#gate{position:fixed;inset:0;z-index:100;background:linear-gradient(165deg,var(--p1),var(--p2) 60%,var(--lav));display:grid;place-items:center;text-align:center;transition:opacity .8s,transform .8s;padding:20px;height:100vh;height:100dvh}
+#gate.go{opacity:0;transform:scale(1.15);pointer-events:none}
+#gate svg{width:clamp(80px,26vw,120px);animation:beat 1s ease-in-out infinite;filter:drop-shadow(0 8px 0 rgba(255,255,255,.55))}
+#gate p{font-family:var(--hd);font-size:clamp(1.2rem,5vw,1.7rem);color:#fff;text-shadow:2px 2px 0 var(--deep);margin:14px 0 18px}
+.lbar{width:min(240px,70vw);height:14px;background:#fff;border-radius:20px;margin:0 auto;padding:3px;box-shadow:0 4px 0 rgba(224,112,159,.4)}
+.lbar i{display:block;height:100%;width:0;border-radius:20px;background:repeating-linear-gradient(45deg,var(--deep) 0 8px,var(--p3) 8px 16px);transition:width .25s}
+#lp{margin-top:8px;font-weight:700;color:#fff;font-size:.9rem}
+@keyframes beat{50%{transform:scale(1.2)}}
+
+/* ===== Progress bar & latar ===== */
+#bar{position:fixed;top:0;left:0;height:6px;width:0;z-index:90;background:linear-gradient(90deg,var(--p3),var(--lav));border-radius:0 6px 6px 0}
+#bg{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.fl{position:absolute;bottom:-50px;animation:up linear infinite;opacity:.6}
+@keyframes up{to{transform:translateY(-120vh) rotate(40deg)}}
+
+/* ===== Hero ===== */
+#hero{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.decos{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.deco{position:absolute;will-change:transform;filter:drop-shadow(0 4px 0 rgba(255,255,255,.7))}
+#hero>*:not(.decos){position:relative;z-index:2}
+#hero h1{font-family:var(--kr);font-size:clamp(3rem,14vw,7.5rem);color:var(--p3);text-shadow:3px 3px 0 #fff,6px 6px 0 var(--p2);line-height:1.05;margin:6px 0;text-wrap:balance}
+#hero h1 small{display:block;font-family:var(--id);font-size:.2em;font-style:italic;font-weight:600;color:var(--ink);text-shadow:none;opacity:.8}
+#type{font-family:var(--kr);font-weight:700;font-size:clamp(1.3rem,5vw,1.8rem);min-height:2.2em;margin-top:var(--s3);max-width:100%}
+#type::after{content:"";display:inline-block;width:3px;height:1em;background:var(--deep);margin-left:3px;vertical-align:-.12em;animation:bl 1s steps(2) infinite}
+@keyframes bl{50%{opacity:0}}
+.scrollhint{margin-top:var(--s4);font-size:2rem;color:var(--p3);animation:bob 1.6s infinite}
+@keyframes bob{50%{transform:translateY(12px)}}
+.btn{font-family:var(--id);font-weight:700;border:0;cursor:pointer;background:var(--p3);color:#fff;padding:10px 20px;border-radius:30px;box-shadow:0 4px 0 #f58fb4;transition:.2s;display:inline-flex;align-items:center;gap:6px;font-size:.95rem}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #f58fb4}
+@media(hover:hover){.btn:hover{animation:wig .5s}}
+@keyframes wig{25%{transform:rotate(-5deg) scale(1.08)}75%{transform:rotate(5deg) scale(1.08)}}
+
+/* ===== Reveal ===== */
+.rv{opacity:0;transition:opacity .9s,transform .9s cubic-bezier(.2,.9,.3,1.3)}
+.rv.fade{transform:translateY(24px)}.rv.left{transform:translateX(-40px)}.rv.right{transform:translateX(40px)}.rv.zoom{transform:scale(.6)}
+.rv.in{opacity:1;transform:none}
+
+/* ===== Polaroid ===== */
+.gal{display:grid;gap:clamp(24px,7vw,34px) var(--s2);grid-template-columns:repeat(2,1fr)}
+@media(min-width:640px){.gal{grid-template-columns:repeat(3,1fr);gap:34px 22px}}
+@media(min-width:960px){.gal{grid-template-columns:repeat(4,1fr)}}
+.pol{background:#fff;padding:8px 8px 12px;box-shadow:0 8px 18px rgba(205,120,160,.3);transform:rotate(var(--r)) translateY(-140px);opacity:0;transition:transform .9s cubic-bezier(.3,1.5,.5,1),opacity .5s;cursor:pointer;position:relative}
+.pol.in{transform:rotate(var(--r));opacity:1}
+.pol.in:active{animation:sway .8s ease-in-out infinite}
+@media(hover:hover){.pol.in:hover{animation:sway .8s ease-in-out infinite}}
+@keyframes sway{25%{transform:rotate(calc(var(--r) - 4deg)) scale(1.05)}75%{transform:rotate(calc(var(--r) + 4deg)) scale(1.05)}}
+.pol::before{content:"";position:absolute;top:-10px;left:50%;width:56px;height:18px;margin-left:-28px;background:repeating-linear-gradient(45deg,rgba(205,180,219,.8) 0 6px,rgba(255,200,221,.8) 6px 12px);transform:rotate(-3deg)}
+.ph{aspect-ratio:1;background:linear-gradient(135deg,var(--p2),var(--lav));display:grid;place-items:center;font-size:2.6rem;color:#fff;overflow:hidden}
+.ph img{width:100%;height:100%;object-fit:cover;object-position:50% 35%}
+.pol p{font-family:var(--kr);font-weight:700;font-size:clamp(1rem,3.6vw,1.25rem);text-align:center;margin-top:8px;line-height:1.1;overflow-wrap:anywhere}
+#lb{position:fixed;inset:0;z-index:95;background:rgba(122,74,99,.75);display:none;place-items:center;padding:20px}
+#lb.on{display:grid}
+#lb .pol{opacity:1;transform:rotate(-2deg);width:min(460px,92vw);animation:pop .5s cubic-bezier(.3,1.6,.5,1);padding:14px 14px 20px}
+#lb .pol p{font-size:1.6rem}
+@keyframes pop{from{transform:scale(.3) rotate(20deg)}}
+
+/* ===== Game puzzle blok foto (gaya Block Blast) ===== */
+.gbox{max-width:480px;margin:0 auto;background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,200,221,.55));border:2.5px solid #fff;border-radius:clamp(20px,6vw,30px);padding:var(--s3);box-shadow:0 10px 30px rgba(255,175,204,.5)}
+.gp{text-align:center;font-size:.88rem;opacity:.8;margin-bottom:var(--s2)}
+.gp:empty{display:none}
+.ghd{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:var(--s1);font-size:clamp(.95rem,4.4vw,1.3rem);background:rgba(255,255,255,.78);border:3px solid #fff;border-radius:40px;padding:var(--s1) var(--s2);box-shadow:0 6px 16px rgba(255,175,204,.45);margin-bottom:var(--s2)}
+.gpct{background:var(--p1);border-radius:22px;padding:6px var(--s2);color:var(--deep);font-weight:800;font-size:1.05rem;min-width:clamp(48px,15vw,60px);text-align:center;justify-self:start}
+.gttl{text-align:center;color:var(--deep);font-weight:800;letter-spacing:.06em;padding-left:.06em;white-space:nowrap}
+.gsel{justify-self:end;display:inline-flex;align-items:center;gap:4px;border:0;border-radius:20px;background:var(--deep);color:#fff;font-family:var(--id);font-weight:800;font-size:inherit;letter-spacing:0;padding:4px 10px 4px 14px;cursor:pointer;box-shadow:0 3px 0 #c4507f}
+.gsel:active{transform:translateY(2px);box-shadow:0 1px 0 #c4507f}
+.gsel .iconify{transition:transform .2s}
+.gsel[aria-expanded=true] .iconify{transform:rotate(180deg)}
+.gpop{position:absolute;left:0;right:0;top:calc(100% + 10px);z-index:20;display:none;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:10px;padding:14px 12px;background:#fff;border:3px solid var(--p2);border-radius:22px;box-shadow:0 12px 28px rgba(205,120,160,.4)}
+.gpop.on{display:grid;animation:gpin .25s}
+@keyframes gpin{from{opacity:0;transform:translateY(-8px)}}
+.gch{position:relative;border:0;border-radius:14px;padding:10px 0;font-family:var(--id);font-weight:800;font-size:1rem;background:var(--p1);color:var(--deep);cursor:pointer}
+.gch:active{transform:scale(.94)}
+.gch.cur{background:var(--deep);color:#fff;box-shadow:0 3px 0 #c4507f}
+.gch.ok::after{content:"✓";position:absolute;top:-7px;right:-5px;width:18px;height:18px;border-radius:50%;background:#7bd3a8;color:#fff;font-size:.65rem;line-height:18px;text-align:center}
+.pz{position:relative;width:100%;aspect-ratio:1;background:#fff;border-radius:clamp(14px,4vw,20px);border:4px solid #fff;box-shadow:0 8px 20px rgba(205,120,160,.3);overflow:hidden;touch-action:pan-y}
+.pb{position:absolute;inset:0}
+.pb img{width:100%;height:100%;object-fit:cover;object-position:50% 35%}
+.pcv{position:absolute;inset:0;z-index:2;display:grid;grid-template-columns:repeat(var(--n),1fr);grid-template-rows:repeat(var(--n),1fr)}
+.cc{background:#fff0f5;transition:opacity .5s,background .15s}
+.cc.on{opacity:0}
+.cc.pv{background:rgba(255,105,180,.6)}
+.gl{position:absolute;inset:0;z-index:3;pointer-events:none;transition:opacity .6s;background-image:linear-gradient(to right,rgba(255,255,255,.95) 2px,transparent 2px),linear-gradient(to bottom,rgba(255,255,255,.95) 2px,transparent 2px);background-size:calc(100% / var(--n)) calc(100% / var(--n))}
+.pz.done .gl{opacity:0}
+.bt{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2);margin-top:var(--s2);--ts:clamp(12px,4.4vw,22px)}
+.slot{touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;cursor:grab;aspect-ratio:1;display:grid;place-items:center;border:2px dashed rgba(255,255,255,.95);border-radius:clamp(12px,4vw,18px);background:rgba(255,255,255,.4)}
+.bp{display:grid;gap:2px;grid-template-columns:repeat(var(--w),var(--ts));grid-auto-rows:var(--ts);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;animation:bpin .35s}
+.bp i{border-radius:4px;background:linear-gradient(135deg,#ff8cc6,#ff5fa8);box-shadow:inset 0 -3px 0 rgba(0,0,0,.12),inset 0 2px 0 rgba(255,255,255,.4)}
+.bp.drag{position:fixed;z-index:150;gap:0;animation:none;cursor:grabbing;filter:drop-shadow(0 10px 12px rgba(122,74,99,.4))}
+.bp.drag i{border-radius:3px}
+@keyframes bpin{from{transform:scale(.4);opacity:0}}
+/* layar puzzle selesai */
+#gwo{position:fixed;inset:0;z-index:99;background:linear-gradient(180deg,#ffb6c9,#ffafcc);display:flex;padding:20px;opacity:0;visibility:hidden;transition:opacity .5s,visibility 0s .5s;overflow-y:auto}
+#gwo.on{opacity:1;visibility:visible;transition:opacity .5s}
+.gwi{width:min(420px,100%);text-align:center;color:#fff;margin:auto}
+.gwi h3{font-weight:800;font-size:clamp(1.7rem,8vw,2.4rem);text-shadow:0 3px 10px rgba(0,0,0,.18)}
+.gpol{background:#fff;padding:12px 12px 16px;margin:clamp(14px,3.5vh,22px) auto;transform:rotate(-2deg);box-shadow:0 14px 30px rgba(122,74,99,.35);width:min(88%,360px)}
+.gph{aspect-ratio:1;overflow:hidden;background:var(--p2)}
+.gph img{width:100%;height:100%;object-fit:cover;object-position:50% 35%}
+.gpol p{font-family:var(--hd);color:#444;font-size:1.6rem;margin-top:10px}
+#gwmsg{font-family:var(--kr);font-weight:700;font-size:1.4rem;margin-bottom:clamp(12px,2.6vh,18px);line-height:1.3}
+#gwmsg .id{color:#fff}
+.gnext{display:block;width:100%;border:0;border-radius:40px;background:#fff;color:var(--deep);font-family:var(--id);font-weight:800;font-size:1.05rem;text-transform:uppercase;padding:16px;cursor:pointer;box-shadow:0 6px 0 rgba(224,112,159,.35)}
+.gnext:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(224,112,159,.35)}
+.gcl{margin-top:14px;background:none;border:0;color:#fff;font-family:var(--id);font-weight:700;text-decoration:underline;cursor:pointer;font-size:.95rem}
+
+/* ===== Playlist (gaya Spotify versi pink) ===== */
+body.lock{overflow:hidden}
+body.hasmini{padding-bottom:84px}
+.ppb .iu{display:none}body.mplay .ppb .iu{display:block}body.mplay .ppb .ip{display:none}
+.plist{max-width:640px;margin:0 auto}
+.tracks{list-style:none;display:flex;flex-direction:column;gap:var(--s2)}
+.tracks li{display:flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s3) var(--s2) var(--s1);background:#fff;border-radius:clamp(16px,5vw,24px);border-left:clamp(4px,1.4vw,6px) solid transparent;box-shadow:0 3px 10px rgba(205,120,160,.15);cursor:pointer;transition:background .2s,border-color .2s,transform .15s}
+.tracks li:active{transform:scale(.985)}
+@media(hover:hover){.tracks li:hover{background:var(--p4)}}
+.tracks li.act{background:var(--p1);border-left-color:var(--deep)}
+.tcv{position:relative;width:52px;height:52px;border-radius:12px;flex:none;background:linear-gradient(135deg,var(--p3),var(--lav));display:grid;place-items:center;color:#fff;overflow:hidden;font-size:1.4rem}
+.ci{position:absolute;inset:0}
+.ci img{width:100%;height:100%;object-fit:cover}
+.ti{flex:1;min-width:0;text-align:left}
+.ti b{display:block;font-family:var(--id),var(--kr),sans-serif;font-weight:700;font-size:1rem;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ti span{display:block;font-size:.82rem;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tn{width:clamp(24px,7vw,32px);flex:none;display:grid;place-items:center;font-weight:800;font-size:clamp(1rem,4vw,1.15rem);color:var(--deep)}
+.tracks .tcv{width:clamp(50px,15vw,62px);height:clamp(50px,15vw,62px);border-radius:clamp(10px,3vw,14px)}
+.tracks .ti b{font-size:clamp(.98rem,4.2vw,1.12rem);color:#4a2540}
+.tracks .ti span{font-size:clamp(.8rem,3.4vw,.92rem);opacity:.75;margin-top:2px}
+.tracks li.act .ti b{color:var(--deep)}
+.td{font-size:clamp(.8rem,3.4vw,.95rem);color:#4a2540;opacity:.85;font-variant-numeric:tabular-nums}
+.eq{display:none;gap:3px;align-items:flex-end;height:16px}
+.eq i{width:4px;background:var(--deep);border-radius:2px;animation:eq .9s ease-in-out infinite;animation-play-state:paused}
+.eq i:nth-child(2){animation-delay:-.3s}.eq i:nth-child(3){animation-delay:-.6s}
+@keyframes eq{0%,100%{height:4px}50%{height:16px}}
+.tracks li.act .tn span{display:none}.tracks li.act .eq{display:flex}   /* lagu aktif: angka diganti bar equalizer */
+body.mplay .eq i{animation-play-state:running}                          /* bar bergerak hanya saat musik diputar */
+/* mini player di bawah layar */
+#mini{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));width:min(560px,calc(100% - 24px));transform:translate(-50%,170%);z-index:85;display:flex;align-items:center;gap:12px;padding:8px 8px 10px 8px;border-radius:18px;background:linear-gradient(135deg,var(--deep),#c4507f);color:#fff;box-shadow:0 8px 24px rgba(196,80,127,.55);cursor:pointer;transition:transform .5s cubic-bezier(.3,1.3,.5,1)}
+#mini.show{transform:translate(-50%,0)}
+body.fullopen #mini{transform:translate(-50%,170%)}
+#mini .tcv{width:46px;height:46px;border-radius:8px}
+#mini button{border:0;background:none;color:#fff;font-size:1.8rem;width:46px;height:46px;display:grid;place-items:center;cursor:pointer;border-radius:50%;flex:none}
+.mbar{position:absolute;left:12px;right:12px;bottom:3px;height:3px;background:rgba(255,255,255,.3);border-radius:3px;overflow:hidden}
+.mbar i{display:block;height:100%;width:0;background:#fff}
+/* layar pemutar penuh (tema terang) */
+#full{position:fixed;inset:0;z-index:97;color:#4a2540;transform:translateY(100%);visibility:hidden;transition:transform .5s cubic-bezier(.3,.9,.3,1),visibility 0s .5s;background:linear-gradient(180deg,var(--p1) 0%,#f3e6f8 50%,#dacdf0 100%);overflow:hidden}
+#full.on{transform:none;visibility:visible;transition:transform .5s cubic-bezier(.3,.9,.3,1)}
+.fwrap{position:relative;width:min(520px,100%);height:100%;margin:0 auto;display:flex;flex-direction:column;padding:max(14px,env(safe-area-inset-top)) clamp(20px,7vw,32px) max(22px,env(safe-area-inset-bottom));overflow-y:auto}
+.ftop{display:flex;align-items:center;gap:8px;text-align:center}
+.ftop button{border:0;background:none;color:#4a2540;font-size:1.8rem;width:44px;height:44px;display:grid;place-items:center;cursor:pointer;flex:none}
+.ftop>div{flex:1;min-width:0}
+.ftop small{display:block;font-size:.85rem;opacity:.8}
+.ftop b{display:block;font-size:1.1rem;overflow-wrap:anywhere}
+.fcw{flex:1 1 0;min-height:clamp(110px,24vh,200px);display:flex;align-items:center;justify-content:center;padding:clamp(8px,2.2vh,26px) 0}
+.fcover{position:relative;flex:none;width:min(100%,420px,40vh);aspect-ratio:1;border-radius:clamp(16px,5vw,22px);background:linear-gradient(135deg,var(--p3),var(--lav));display:grid;place-items:center;font-size:clamp(3rem,12vw,5rem);color:#fff;overflow:hidden;box-shadow:0 clamp(10px,2.4vh,18px) clamp(24px,5vh,40px) rgba(205,120,160,.45)}
+@supports (width:1cqw){.fcw{container-type:size}.fcover{width:min(100cqw,100cqh,420px)}}   /* cover memenuhi sisa ruang, tetap persegi */
+.frow{display:flex;align-items:center;gap:10px}
+.frow .ti b{font-size:clamp(1.2rem,min(5.6vw,3.4vh),1.9rem);white-space:normal;overflow:visible;text-overflow:clip;line-height:1.15;color:#3d1d33}
+.frow .ti span{font-size:clamp(.9rem,2.8vw,1.05rem);opacity:.75;margin-top:4px}
+#bLike{border:0;background:none;color:#4a2540;font-size:1.9rem;width:48px;height:48px;display:grid;place-items:center;cursor:pointer;flex:none}
+#bLike .h1{display:none}#bLike.on .h1{display:block}#bLike.on .h0{display:none}
+#bLike.on{color:#ff6fa5;animation:beat .5s}
+.prog{display:flex;align-items:center;gap:var(--s1);margin-top:clamp(10px,2.6vh,20px);font-size:.85rem;font-variant-numeric:tabular-nums}
+.seek{flex:1;height:24px;display:flex;align-items:center;cursor:pointer;touch-action:none}
+.seek div{position:relative;width:100%;height:6px;background:rgba(122,74,99,.18);border-radius:6px}
+.seek i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--deep);border-radius:6px}
+.seek i::after{content:"";position:absolute;right:-8px;top:-5px;width:16px;height:16px;border-radius:50%;background:var(--deep);box-shadow:0 0 0 3px #fff}
+.ctl{--sm:clamp(34px,min(6.2vh,11vw),44px);--rd:clamp(40px,min(7.2vh,14vw),54px);--pp:clamp(56px,min(10.5vh,20vw),78px);display:flex;align-items:center;justify-content:center;gap:clamp(6px,2.4vw,16px);margin-top:clamp(10px,2.4vh,18px)}
+.ctl button{border:0;background:none;color:#4a2540;cursor:pointer;display:grid;place-items:center;border-radius:50%;transition:.2s}
+.ctl button:active{transform:scale(.9)}
+.ctl .sm{width:var(--sm);height:var(--sm);font-size:calc(var(--sm) * .5)}
+.ctl .rd{width:var(--rd);height:var(--rd);font-size:calc(var(--rd) * .5);background:#fff;box-shadow:0 3px 10px rgba(205,120,160,.3)}
+.ctl .pp{width:var(--pp);height:var(--pp);font-size:calc(var(--pp) * .5);background:#ff8cb8;box-shadow:0 6px 0 #5c3249}
+.ctl .pp:active{transform:translateY(4px);box-shadow:0 2px 0 #5c3249}
+.ctl .on{color:var(--deep);background:var(--p1)}
+.fmsg{margin-top:clamp(12px,2.8vh,22px);text-align:center;font-family:var(--kr);font-weight:700;font-size:clamp(1.2rem,4.5vw,1.5rem);color:var(--deep);overflow-wrap:anywhere}
+.fmsg:empty{display:none}
+
+/* ===== Penutup ===== */
+#end{text-align:center;min-height:80vh;min-height:80dvh;display:flex;flex-direction:column;justify-content:center;align-items:center}
+#end h2{font-family:var(--kr);font-size:clamp(3.4rem,17vw,7rem);font-weight:700;margin:0;text-shadow:3px 3px 0 #fff,6px 6px 0 var(--p2);color:var(--p3)}
+.cf{position:fixed;top:-40px;z-index:120;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(112vh) rotate(540deg)}}
+
+footer{position:relative;z-index:2;text-align:center;padding:12px 16px 32px;font-size:.85rem;font-weight:600;opacity:.75}
+
+/* ===== Kursor hati (hanya desktop) ===== */
+#heart{display:none;position:fixed;z-index:200;pointer-events:none;width:26px;height:26px;transform:translate(-50%,-50%)}
+@media(hover:hover) and (pointer:fine){body.cur,body.cur *{cursor:none!important}#heart{display:block}}
+.spk{position:fixed;z-index:199;pointer-events:none;animation:sk .8s forwards;width:14px;height:14px}
+@keyframes sk{to{opacity:0;transform:translateY(22px) scale(.2) rotate(90deg)}}
+:focus-visible{outline:3px solid var(--lav);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01s!important}.rv,.pol{opacity:1;transform:rotate(var(--r,0deg))}html{scroll-behavior:auto}}
+</style>
+</head>
+<body class="cur loading">
+
+<!-- Layar loading (hilang otomatis setelah semuanya siap) -->
+<div id="gate"><div>
+  <svg viewBox="0 0 24 24"><path fill="#ff7eb0" stroke="#fff" stroke-width="1.2" d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/></svg>
+  <p>loading...</p>
+  <div class="lbar"><i id="lf"></i></div><div id="lp">0%</div>
+</div></div>
+<div id="bar"></div><div id="bg"></div>
+<svg id="heart" viewBox="0 0 24 24"><path fill="#ff7eb0" stroke="#fff" stroke-width="1.5" d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/></svg>
+
+<section id="hero">
+  <div class="decos">
+    <span class="deco" data-s=".15" style="top:9%;left:5%;font-size:clamp(2.2rem,9vw,4rem)"><span class="iconify" data-icon="fluent-emoji-flat:cloud"></span></span>
+    <span class="deco" data-s=".3" style="top:16%;right:6%;font-size:clamp(2rem,8vw,3.4rem)"><span class="iconify" data-icon="fluent-emoji-flat:ribbon"></span></span>
+    <span class="deco" data-s="-.2" style="bottom:14%;left:7%;font-size:clamp(1.8rem,7vw,3rem)"><span class="iconify" data-icon="fluent-emoji-flat:cherry-blossom"></span></span>
+    <span class="deco" data-s=".25" style="bottom:20%;right:7%;font-size:clamp(1.8rem,7vw,3rem)"><span class="iconify" data-icon="fluent-emoji-flat:sparkles"></span></span>
+  </div>
+  <h1 id="title"></h1>
+  <div id="type"></div>
+  <div class="scrollhint"><span class="iconify" data-icon="ph:caret-double-down-bold"></span></div>
+</section>
+
+<section id="music"><h2><span class="iconify" data-icon=""></span>My Playlist<span class="iconify" data-icon=""></span></h2>
+  <div class="plist rv zoom" id="plist">
+    <ul class="tracks" id="tracks"></ul>
+  </div>
+</section>
+<section id="photos"><h2><span class="iconify" data-icon=""></span>Random Picture<span class="iconify" data-icon=""></span></h2><div class="gal" id="gal"></div></section>
+<section id="game"><h2><span class="iconify" data-icon=""></span>Game Puzzle<span class="iconify" data-icon=""></span></h2>
+  <div class="gbox rv zoom">
+    <div class="ghd">
+      <div class="gpct" id="gpct">0%</div>
+      <div class="gttl">PUZZLE</div>
+      <button class="gsel" id="gsel" aria-haspopup="true" aria-expanded="false" aria-label="Pilih puzzle"><b id="gnum">1</b><span class="iconify" data-icon="ph:caret-down-bold"></span></button>
+      <div class="gpop" id="gpop" role="menu"></div>
+    </div>
+    <div class="pz" id="gboard"><div class="pb"><img id="gphoto" alt=""></div><div class="pcv" id="gcover"></div><div class="gl"></div></div>
+    <div class="bt" id="gtray"></div>
+  </div>
+</section>
+<!-- Layar "Puzzle selesai" -->
+<div id="gwo" aria-hidden="true"><div class="gwi">
+  <h3>PUZZLE SELESAI!</h3>
+  <div class="gpol"><div class="gph"><img id="gwimg" alt=""></div><p id="gwcap"></p></div>
+  <div id="gwmsg"></div>
+  <button class="gnext" id="gnext">Lanjut foto berikutnya</button>
+  <button class="gcl" id="gclose">Tutup</button>
+</div></div>
+<section id="end"><h2 id="closeKr"></h2><div id="closeId"></div><button class="btn" id="rain" style="margin-top:var(--s4)"><span class="iconify" data-icon=""></span>coba pencet</button></section>
+
+<footer>©2026 mbmln_</footer>
+
+<div id="lb"></div>
+<!-- Mini player (muncul setelah lagu dipilih) -->
+<div id="mini" role="button" tabindex="0" aria-label="Buka pemutar">
+  <div class="tcv"><span class="iconify" data-icon="ph:music-notes-fill"></span><span class="ci" id="mimg"></span></div>
+  <div class="ti"><b id="mt"></b><span id="ma"></span></div>
+  <button class="ppb" id="mPlay" aria-label="Putar atau jeda"><span class="iconify ip" data-icon="ph:play-fill"></span><span class="iconify iu" data-icon="ph:pause-fill"></span></button>
+  <div class="mbar"><i id="mf"></i></div>
+</div>
+<!-- Pemutar layar penuh -->
+<div id="full" aria-hidden="true">
+  <div class="fwrap">
+    <div class="ftop"><button id="fClose" aria-label="Tutup"><span class="iconify" data-icon="ph:caret-down-fill"></span></button><div><small>Memainkan dari Playlist</small><b id="fpn"></b></div><span style="width:44px;flex:none"></span></div>
+    <div class="fcw"><div class="fcover"><span class="iconify" data-icon="ph:music-notes-fill"></span><span class="ci" id="fimg"></span></div></div>
+    <div class="frow">
+      <div class="ti"><b id="nt"></b><span id="na"></span></div>
+      <button id="bLike" aria-label="Suka"><span class="iconify h0" data-icon="ph:heart-bold"></span><span class="iconify h1" data-icon="ph:heart-fill"></span></button>
+    </div>
+    <div class="prog"><span id="tcur">0:00</span><div class="seek" id="seek"><div><i id="sf"></i></div></div><span id="ttot">0:00</span></div>
+    <div class="ctl">
+      <button class="sm" id="bShuf" aria-label="Acak lagu"><span class="iconify" data-icon="ph:shuffle-bold"></span></button>
+      <button class="rd" id="bPrev" aria-label="Sebelumnya"><span class="iconify" data-icon="ph:skip-back-fill"></span></button>
+      <button class="pp ppb" id="bPlay" aria-label="Putar atau jeda"><span class="iconify ip" data-icon="ph:play-fill"></span><span class="iconify iu" data-icon="ph:pause-fill"></span></button>
+      <button class="rd" id="bNext" aria-label="Berikutnya"><span class="iconify" data-icon="ph:skip-forward-fill"></span></button>
+      <button class="sm" id="bRep" aria-label="Ulangi lagu"><span class="iconify" data-icon="ph:repeat-bold"></span></button>
+    </div>
+    <div class="fmsg" id="fmsg"></div>
+  </div>
+</div>
+<audio id="au" preload="auto" playsinline></audio>
+
+<script>
+/* =====================================================
+   ✏️ PERSONALISASI — edit semua isi di objek ini saja
+   Kolom "id" = terjemahan Indonesia. Dikosongkan supaya kamu isi sendiri;
+   kalau tetap "" maka bagian terjemahan tidak ditampilkan.
+   ===================================================== */
+const config = {
+  myName: "catrina",                // namamu (tanda tangan di pesan kemenangan game)
+
+  title: "카트리나 앨범",          // judul besar di hero
+  titleId: "",                  // terjemahan judul (opsional)
+  heroTyping: "안녕하세요 여러분, 카트리나의 앨범에 오신 것을 환영합니다.",       // teks yang diketik di hero
+
+  /* PLAYLIST LAGU KESUKAAN — tampil seperti Spotify: daftar lagu dulu, ketuk lagu untuk membuka pemutar layar penuh.
+     Taruh file lagu sefolder dengan index.html lalu isi namanya di src.
+     title = judul lagu, artist = penyanyi
+     cover = gambar sampul (opsional, mis. "cover1.jpg"; "" = sampul pink bawaan)
+     msg   = kalimat manis dari kamu yang tampil besar di layar pemutar (tulis sendiri, bukan lirik)
+     Kosongkan playlist ( [] ) kalau tidak mau bagian musik. */
+  playlistName: "Lagu Kesukaanku",
+  playlist: [
+    {src:"ohmy.mp3", title:"Oh My Angel", artist:"Bertha Tillman", cover:"my.jpg", msg:""},
+    {src:"shp.mp3", title:"Shape Of My Heart", artist:"Backstreet Boys", cover:"shp.jpg", msg:""},
+    {src:"byy.mp3", title:"honeybee", artist:"Olivia Rodrigo", cover:"by.jpg", msg:""},
+    {src:"abtu.mp3", title:"About You", artist:"The 1975", cover:"abt.jpg", msg:""}
+  ],
+  shuffle: false,        // true = mulai dengan mode acak
+
+  /* FOTO: ganti src dengan nama file fotomu (foto1.jpg, foto2.jpg, dst.),
+     taruh file foto sefolder dengan index.html. Kosongkan src ("") untuk placeholder.
+     Ganti caption sesukamu. */
+  photos: [
+    {src:"k10.jpg",  caption:""},
+    {src:"k1.jpg", caption:""},
+    {src:"k2.jpg", caption:""},
+    {src:"k3.jpg", caption:""},
+    {src:"k8.jpg", caption:""},
+    {src:"k9.jpg", caption:""}
+  ],
+
+  /* GAME puzzle blok foto (seperti Block Blast) — seret balok ke papan; tiap kotak yang terisi membuka sebagian fotonya.
+     puzzlePhotos = daftar foto yang dibuka satu per satu (src = nama file, mis. "foto1.jpg", sefolder dengan index.html;
+     "" = foto placeholder). caption = tulisan di polaroid saat puzzle selesai. Tambah/hapus baris sesukamu.
+     puzzleSize = jumlah kotak per sisi papan (8 = 8x8; 5-10 boleh).
+     gameWinKr / gameWinId = pesan saat puzzle selesai (id = terjemahanmu, opsional). */
+  puzzlePhotos: [
+    {src:"k.jpg", caption:"Perfect!"},
+    {src:"k7.jpg", caption:"Perfect!"},
+    {src:"k5.jpg",  caption:"Perfect!"},
+    {src:"k4.jpg", caption:"Perfect!"}
+  ],
+  puzzleSize: 8,
+  gameWinKr: "기쁘네요! 다음 퍼즐로 넘어가는 것도 잊지 마세요.",
+  gameWinId: "",
+
+  /* Penutup */
+  closeKr: "사랑해",
+  closeId: ""
+};
+
+/* ============ Fungsi bantu ============ */
+const $ = s => document.querySelector(s);
+const rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const mk = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h) e.innerHTML = h; return e; };
+const ic = n => `<span class="iconify" data-icon="${n}"></span>`;           // ikon Iconify
+const tr = t => t ? `<div class="id">${t}</div>` : '';                       // terjemahan hanya muncul jika diisi
+const heartSvg = (c='#ff7eb0') => `<svg viewBox="0 0 24 24" width="100%" height="100%"><path fill="${c}" d="M12 21s-8-5.3-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.7-8 11-8 11z"/></svg>`;
+const starSvg = (c='#CDB4DB') => `<svg viewBox="0 0 24 24" width="100%" height="100%"><path fill="${c}" d="M12 1l2.6 7.4L22 12l-7.4 3.6L12 23l-2.6-7.4L2 12l7.4-3.6z"/></svg>`;
+const cols = ['#ff7eb0','#FFAFCC','#CDB4DB','#FFC8DD'];
+const rnd = a => a[Math.random() * a.length | 0];
+
+/* ============ Hero ============ */
+$('#title').innerHTML = config.title + (config.titleId ? `<small>(${config.titleId})</small>` : '');
+function typeText(){
+  const el = $('#type'), s = config.heroTyping; let i = 0;
+  if (rm) { el.textContent = s; return; }
+  (function t(){ el.textContent = s.slice(0, ++i); if (i < s.length) setTimeout(t, 90); })();
+}
+
+/* ============ Galeri polaroid + lightbox ============ */
+const loads = [];   // dipakai loading screen untuk menunggu foto
+config.photos.forEach((f, i) => {
+  const p = mk('div', 'pol');
+  p.style.setProperty('--r', ((Math.random() * 10) - 5).toFixed(1) + 'deg');
+  p.style.transitionDelay = (i % 4) * .15 + 's';
+  // src kosong → foto acak picsum; kalau foto gagal dimuat → ikon kamera
+  const src = f.src || `https://picsum.photos/seed/kenangan${i}/500/500`;
+  p.innerHTML = `<div class="ph">${ic('ph:camera-fill')}</div><p>${f.caption}</p>`;
+  const img = new Image(); img.alt = f.caption;
+  loads.push(new Promise(res => {
+    img.onload = () => { const b = p.querySelector('.ph'); b.innerHTML = ''; b.appendChild(img); res(); };
+    img.onerror = res;
+  }));
+  img.src = src;
+  p.onclick = () => { const l = $('#lb'); l.innerHTML = ''; l.appendChild(p.cloneNode(true)); l.classList.add('on'); };
+  $('#gal').appendChild(p);
+});
+$('#lb').onclick = () => $('#lb').classList.remove('on');
+addEventListener('keydown', e => e.key === 'Escape' && $('#lb').classList.remove('on'));
+
+/* ============ Game: puzzle blok foto (gaya Block Blast) ============ */
+(function(){
+  const photos = config.puzzlePhotos || [];
+  if (!photos.length) { $('#game').style.display = 'none'; return; }
+  const n = Math.min(10, Math.max(5, (config.puzzleSize | 0) || 8)), NN = n * n;
+  const board = $('#gboard'), cvr = $('#gcover'), tray = $('#gtray');
+  board.parentElement.style.setProperty('--n', n);
+
+  // bentuk balok: X = terisi
+  const SH = [['X'], ['XX'], ['X', 'X'], ['XXX'], ['X', 'X', 'X'], ['XXXX'], ['X', 'X', 'X', 'X'],
+    ['XX', 'XX'], ['XXX', 'XXX', 'XXX'], ['XXX', 'XXX'], ['XX', 'XX', 'XX'],
+    ['X.', 'XX'], ['.X', 'XX'], ['XX', 'X.'], ['XX', '.X'],
+    ['X..', 'X..', 'XXX'], ['..X', '..X', 'XXX'], ['XXX', 'X..', 'X..'], ['XXX', '..X', '..X'],
+    ['XX.', '.XX'], ['.XX', 'XX.'], ['X.', 'XX', '.X'], ['.X', 'XX', 'X.']
+  ].map(rows => {
+    const cells = [];
+    rows.forEach((str, r) => [...str].forEach((ch, c) => ch === 'X' && cells.push([r, c])));
+    return {cells, w: Math.max(...rows.map(x => x.length)), h: rows.length};
+  });
+
+  let level = 0, filled = [], fcount = 0, pieces = [null, null, null], drag = null, done = false, curSrc = '';
+  const cells = [], slots = [];
+  for (let i = 0; i < NN; i++) { const c = mk('div', 'cc'); cvr.appendChild(c); cells.push(c); }
+  for (let i = 0; i < 3; i++) slots.push(tray.appendChild(mk('div', 'slot')));
+
+  // foto level: kalau file tidak ketemu pakai foto placeholder
+  const loadPhoto = k => new Promise(res => {
+    const fb = `https://picsum.photos/seed/puzzle${k}/700/700`, want = photos[k].src || fb, p = new Image();
+    p.onload = () => res(want); p.onerror = () => res(fb); p.src = want;
+  });
+  loads.push(loadPhoto(0));                                   // loading screen menunggu foto pertama
+
+  const fits = (sh, r, c) => sh.cells.every(([dr, dc]) => {
+    const rr = r + dr, cc = c + dc;
+    return rr >= 0 && cc >= 0 && rr < n && cc < n && !filled[rr * n + cc];
+  });
+  const canFit = sh => { for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (fits(sh, r, c)) return true; return false; };
+  function pick(){                                            // pilih balok yang pasti muat; yang besar lebih sering muncul
+    const ok = SH.filter(canFit); let x = Math.random() * ok.reduce((a, s) => a + 1 + s.cells.length, 0);
+    for (const s of ok) { x -= 1 + s.cells.length; if (x <= 0) return s; }
+    return ok[0];
+  }
+  const pct = () => $('#gpct').textContent = Math.floor(fcount * 100 / NN) + '%';
+
+  function renderSlot(i){
+    const slot = slots[i], sh = pieces[i]; slot.innerHTML = '';
+    if (!sh) return;
+    const bp = mk('div', 'bp', sh.cells.map(([r, c]) => `<i style="grid-row:${r + 1};grid-column:${c + 1}"></i>`).join(''));
+    bp.style.setProperty('--w', sh.w);
+    bp.onpointermove = move; bp.onpointerup = up;
+    bp.onpointercancel = () => { if (drag) drag.tgt = null; up(); };
+    slot.onpointerdown = e => { if (pieces[i] && slot.contains(bp)) down(e, i, bp); };   // seluruh kotak slot bisa disentuh, bukan hanya baloknya
+    slot.appendChild(bp);
+  }
+  const newBatch = () => { pieces = [pick(), pick(), pick()]; pieces.forEach((_, i) => renderSlot(i)); };
+  function refit(){                                           // ganti balok sisa yang sudah tidak muat di mana pun
+    pieces.forEach((p, i) => { if (p && !canFit(p)) { pieces[i] = pick(); renderSlot(i); } });
+  }
+
+  const clearPv = () => cells.forEach(c => c.classList.remove('pv'));
+  function down(e, i, bp){
+    if (drag || done) return;
+    e.preventDefault();
+    const cell = cvr.getBoundingClientRect().width / n, sh = pieces[i];
+    bp.setPointerCapture(e.pointerId);
+    bp.classList.add('drag'); bp.style.setProperty('--ts', cell + 'px');   // balok membesar seukuran kotak papan
+    drag = {i, bp, sh, cell, lift: e.pointerType === 'mouse' ? 0 : cell * 1.8, tgt: null};   // di HP diangkat agar tidak tertutup jari
+    move(e);
+  }
+  function move(e){
+    if (!drag) return;
+    const {bp, sh, cell, lift} = drag;
+    const x = e.clientX - sh.w * cell / 2, y = e.clientY - sh.h * cell / 2 - lift;
+    bp.style.left = x + 'px'; bp.style.top = y + 'px';
+    const r = cvr.getBoundingClientRect(), col = Math.round((x - r.left) / cell), row = Math.round((y - r.top) / cell);
+    clearPv(); drag.tgt = null;
+    if (fits(sh, row, col)) { drag.tgt = [row, col]; sh.cells.forEach(([dr, dc]) => cells[(row + dr) * n + col + dc].classList.add('pv')); }
+  }
+  function up(){
+    if (!drag) return;
+    const {i, bp, sh, tgt} = drag; drag = null; clearPv();
+    bp.classList.remove('drag'); bp.style.left = bp.style.top = ''; bp.style.removeProperty('--ts');
+    if (!tgt) return;                                         // tidak muat → balok kembali ke baki
+    const [r, c] = tgt;
+    sh.cells.forEach(([dr, dc], k) => {                       // buka bagian foto di bawah balok
+      const id = (r + dr) * n + c + dc; filled[id] = true;
+      setTimeout(() => cells[id].classList.add('on'), k * 40);
+    });
+    fcount += sh.cells.length; pct();
+    const cr = cvr.getBoundingClientRect(), cell = cr.width / n;
+    burst(cr.left + (c + sh.w / 2) * cell, cr.top + (r + sh.h / 2) * cell, 6);
+    pieces[i] = null; renderSlot(i);
+    if (fcount === NN) return win();
+    if (pieces.every(p => !p)) setTimeout(newBatch, 250); else refit();
+  }
+
+  function win(){
+    done = true; board.classList.add('done'); doneLv.add(level); refreshSel();
+    $('#gwimg').src = curSrc; $('#gwcap').textContent = photos[level].caption || 'Perfect!';
+    $('#gwmsg').innerHTML = `${config.gameWinKr}${tr(config.gameWinId)}<div style="font-size:1.1rem;margin-top:4px">- ${config.myName} ${ic('fluent-emoji-flat:heart-with-ribbon')}</div>`;
+    $('#gnext').textContent = level === photos.length - 1 ? 'Main lagi dari awal' : 'Lanjut foto berikutnya';
+    setTimeout(() => { $('#gwo').classList.add('on'); B.classList.add('lock'); rain(60); }, 900);
+  }
+  function closeWin(){
+    $('#gwo').classList.remove('on');
+    if (!B.classList.contains('fullopen')) B.classList.remove('lock');
+  }
+  function start(){
+    done = false; board.classList.remove('done');
+    filled = Array(NN).fill(false); fcount = 0; pieces = [null, null, null];
+    cells.forEach(c => c.className = 'cc'); pct();
+    $('#gnum').textContent = level + 1; refreshSel();
+    newBatch();
+    loadPhoto(level).then(src => { curSrc = src; $('#gphoto').src = src; });
+  }
+  $('#gnext').onclick = () => { closeWin(); level = (level + 1) % photos.length; start(); };
+  $('#gclose').onclick = () => { closeWin(); openSel(); };      // setelah Tutup, langsung muncul pilihan puzzle
+  addEventListener('keydown', e => e.key === 'Escape' && (closeWin(), closeSel()));
+  // pilihan nomor puzzle (di sebelah tulisan PUZZLE); tanda centang = sudah selesai
+  const doneLv = new Set(), pop = $('#gpop'), sel = $('#gsel'), chips = [];
+  photos.forEach((_, k) => {
+    const b = mk('button', 'gch', k + 1);
+    b.setAttribute('role', 'menuitem'); b.setAttribute('aria-label', 'Puzzle ' + (k + 1));
+    b.onclick = () => { closeSel(); closeWin(); level = k; start(); };
+    pop.appendChild(b); chips.push(b);
+  });
+  const refreshSel = () => chips.forEach((b, k) => { b.classList.toggle('cur', k === level); b.classList.toggle('ok', doneLv.has(k)); });
+  const openSel = () => { pop.classList.add('on'); sel.setAttribute('aria-expanded', 'true'); };
+  const closeSel = () => { pop.classList.remove('on'); sel.setAttribute('aria-expanded', 'false'); };
+  sel.onclick = () => pop.classList.contains('on') ? closeSel() : openSel();
+  document.addEventListener('pointerdown', e => { if (!e.target.closest('.ghd')) closeSel(); });
+  // ukuran balok di baki mengikuti lebar slot, jadi pas di semua ukuran layar
+  const fitTray = () => { const w = slots[0].clientWidth; if (w) tray.style.setProperty('--ts', Math.max(12, Math.min(30, w * .2)) + 'px'); };
+  if (window.ResizeObserver) new ResizeObserver(fitTray).observe(tray); else addEventListener('resize', fitTray);
+  fitTray();
+  // cadangan: cegah halaman ikut scroll saat balok sedang diseret
+  document.addEventListener('touchmove', e => { if (drag) e.preventDefault(); }, {passive: false});
+  start();
+})();
+
+/* ============ Penutup ============ */
+$('#closeKr').textContent = config.closeKr;
+$('#closeId').innerHTML = tr(config.closeId);
+
+/* ============ Reveal on scroll ============ */
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+}), {threshold: .12});
+document.querySelectorAll('h2').forEach(h => h.classList.add('rv', 'fade'));
+document.querySelectorAll('.rv,.pol').forEach(el => io.observe(el));
+
+/* ============ Progress bar + parallax (hanya di area hero) ============ */
+addEventListener('scroll', () => {
+  const h = document.documentElement;
+  $('#bar').style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%';
+  if (!rm && scrollY < innerHeight * 1.5) document.querySelectorAll('.deco').forEach(el => el.style.transform = `translateY(${scrollY * el.dataset.s}px)`);
+}, {passive: true});
+
+/* ============ Partikel latar ============ */
+const floaters = ['fluent-emoji-flat:sparkling-heart','fluent-emoji-flat:star','fluent-emoji-flat:sparkles','fluent-emoji-flat:cherry-blossom','fluent-emoji-flat:cloud','fluent-emoji-flat:heart-suit'];
+for (let i = 0; i < (innerWidth < 600 ? 9 : 16); i++) {
+  const f = mk('span', 'fl', ic(floaters[i % floaters.length]));
+  f.style.cssText = `left:${Math.random() * 100}%;font-size:${18 + Math.random() * 20}px;animation-duration:${16 + Math.random() * 16}s;animation-delay:-${Math.random() * 24}s`;
+  $('#bg').appendChild(f);
+}
+
+/* ============ Konfeti / hujan hati ============ */
+function rain(n = 40){
+  if (rm) return;
+  for (let i = 0; i < n; i++) {
+    const c = mk('span', 'cf', i % 3 ? heartSvg(rnd(cols)) : starSvg(rnd(cols)));
+    const s = 14 + Math.random() * 18;
+    c.style.cssText = `left:${Math.random() * 100}%;width:${s}px;height:${s}px;animation-duration:${2.5 + Math.random() * 3}s;animation-delay:${Math.random() * 1.5}s`;
+    document.body.appendChild(c); setTimeout(() => c.remove(), 7500);
+  }
+}
+function burst(x, y, n){
+  if (rm) return;
+  for (let i = 0; i < n; i++) {
+    const s = mk('span', 'spk', heartSvg(rnd(cols)));
+    s.style.left = x + (Math.random() * 80 - 40) + 'px'; s.style.top = y + (Math.random() * 40 - 20) + 'px';
+    document.body.appendChild(s); setTimeout(() => s.remove(), 800);
+  }
+}
+$('#rain').onclick = () => rain(60);
+new IntersectionObserver(e => e[0].isIntersecting && rain(), {threshold: .6}).observe($('#end'));
+
+/* ============ Kursor hati + jejak sparkle (desktop saja) ============ */
+if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
+  let last = 0;
+  addEventListener('mousemove', e => {
+    $('#heart').style.left = e.clientX + 'px'; $('#heart').style.top = e.clientY + 'px';
+    if (rm || Date.now() - last < 60) return; last = Date.now();
+    const s = mk('span', 'spk', Math.random() < .5 ? starSvg(rnd(cols)) : heartSvg(rnd(cols)));
+    s.style.left = e.clientX + 'px'; s.style.top = e.clientY + 'px';
+    document.body.appendChild(s); setTimeout(() => s.remove(), 800);
+  });
+} else document.body.classList.remove('cur');
+
+/* ============ Musik: playlist + pemutar layar penuh (gaya Spotify) ============ */
+const au = $('#au'), list = config.playlist, B = document.body, full = $('#full');
+let idx = 0, fails = 0, resume = false, wantPlay = false, started = false, shuf = !!config.shuffle;
+const liked = [], rows = [];
+const fmt = s => isFinite(s) ? Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0') : '0:00';
+const cvr = c => c ? `<img src="${c}" alt="" onerror="this.remove()">` : '';
+
+function setTrack(i){
+  idx = i; const t = list[i], ti = t.title || 'Lagu ' + (i + 1);
+  au.src = t.src;
+  ['#nt', '#mt'].forEach(q => $(q).textContent = ti);
+  ['#na', '#ma'].forEach(q => $(q).textContent = t.artist || '');
+  ['#fimg', '#mimg'].forEach(q => $(q).innerHTML = cvr(t.cover));
+  $('#fmsg').textContent = t.msg || '';
+  $('#bLike').classList.toggle('on', !!liked[i]);
+    rows.forEach((r, k) => r.classList.toggle('act', started && k === i));
+  ['#sf', '#mf'].forEach(q => $(q).style.width = '0');
+  $('#tcur').textContent = '0:00'; $('#ttot').textContent = '0:00';
+}
+function play(i){
+  wantPlay = true; started = true;
+  if (i !== undefined) setTrack(i);
+  $('#mini').classList.add('show'); B.classList.add('hasmini');
+  au.play().catch(() => {});
+}
+function nextIdx(){
+  if (shuf && list.length > 1) { let n; do n = Math.random() * list.length | 0; while (n === idx); return n; }
+  return (idx + 1) % list.length;
+}
+function toggle(){
+  if (!started) play(shuf ? Math.random() * list.length | 0 : 0);
+  else if (au.paused) play();
+  else au.pause();
+}
+function openFull(){ full.classList.add('on'); full.setAttribute('aria-hidden', 'false'); B.classList.add('lock', 'fullopen'); }
+function closeFull(){ full.classList.remove('on'); full.setAttribute('aria-hidden', 'true'); B.classList.remove('lock', 'fullopen'); }
+
+if (!list.length) { $('#music').style.display = 'none'; }
+else {
+  $('#fpn').textContent = config.playlistName;
+  list.forEach((t, i) => {
+    const li = mk('li', '', `<div class="tn"><span>${i + 1}</span><div class="eq"><i></i><i></i><i></i></div></div>
+      <div class="tcv">${ic('ph:music-notes-fill')}<span class="ci">${cvr(t.cover)}</span></div>
+      <div class="ti"><b>${t.title || 'Lagu ' + (i + 1)}</b><span>${t.artist || ''}</span></div>
+      <div class="td"></div>`);
+    li.onclick = () => { play(i); openFull(); };           // ketuk lagu → putar + buka layar penuh
+    $('#tracks').appendChild(li); rows.push(li);
+    const a = new Audio(); a.preload = 'metadata';          // ambil durasi tiap lagu (diam jika file belum ada)
+    a.onloadedmetadata = () => li.querySelector('.td').textContent = fmt(a.duration);
+    a.src = t.src;
+  });
+  setTrack(0);
+
+  // Tombol
+  const stop = fn => e => { e.stopPropagation(); fn(e); };
+  $('#bPlay').onclick = toggle;
+  $('#mPlay').onclick = stop(toggle);
+  $('#mini').onclick = openFull;
+  $('#mini').onkeydown = e => (e.key === 'Enter') && openFull();
+  $('#fClose').onclick = closeFull;
+  addEventListener('keydown', e => e.key === 'Escape' && closeFull());
+  $('#bNext').onclick = () => play(nextIdx());
+  $('#bPrev').onclick = () => { if (au.currentTime > 3) au.currentTime = 0; else play((idx - 1 + list.length) % list.length); };
+  const syncShuf = () => $('#bShuf').classList.toggle('on', shuf);
+  $('#bShuf').onclick = () => { shuf = !shuf; syncShuf(); };
+  syncShuf();
+  $('#bRep').onclick = e => { au.loop = !au.loop; e.currentTarget.classList.toggle('on', au.loop); };
+  $('#bLike').onclick = e => {
+    liked[idx] = !liked[idx]; e.currentTarget.classList.toggle('on', liked[idx]);
+    if (liked[idx]) { const r = e.currentTarget.getBoundingClientRect(); burst(r.left + r.width / 2, r.top, 8); }
+  };
+
+  // Bar progres (bisa diketuk / digeser)
+  const sk = $('#seek'); let drag = false;
+  const seekTo = e => { if (!au.duration) return; const r = sk.getBoundingClientRect(); au.currentTime = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * au.duration; };
+  sk.onpointerdown = e => { drag = true; sk.setPointerCapture(e.pointerId); seekTo(e); };
+  sk.onpointermove = e => drag && seekTo(e);
+  sk.onpointerup = sk.onpointercancel = () => drag = false;
+
+  // Status audio
+  au.onplay = () => B.classList.add('mplay');
+  au.onpause = () => B.classList.remove('mplay');
+  au.onplaying = () => fails = 0;
+  au.onended = () => play(nextIdx());                      // lanjut lagu berikutnya; setelah habis ulang dari awal
+  au.onloadedmetadata = () => $('#ttot').textContent = fmt(au.duration);
+  au.ontimeupdate = () => {
+    if (!au.duration) return;
+    const p = (au.currentTime / au.duration * 100) + '%';
+    $('#sf').style.width = p; $('#mf').style.width = p;
+    $('#tcur').textContent = fmt(au.currentTime);
+  };
+  au.onerror = () => {                                     // file tidak ketemu → lewati
+    if (!wantPlay) return;
+    if (++fails >= list.length) { wantPlay = false; setTrack(0); return; }
+    play(nextIdx());
+  };
+}
+
+// Jeda saat tab disembunyikan, lanjut saat dibuka lagi
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { resume = !au.paused; au.pause(); }
+  else if (resume) au.play().catch(() => {});
+});
+
+/* ============ Loading screen ============ */
+let prog = 0, finished = false;
+const setP = v => { $('#lf').style.width = v + '%'; $('#lp').textContent = Math.round(v) + '%'; };
+const tick = setInterval(() => { if (!finished) setP(prog = Math.min(90, prog + Math.random() * 7)); }, 120);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const pageLoaded = new Promise(r => document.readyState === 'complete' ? r() : addEventListener('load', r));
+Promise.race([
+  Promise.all([pageLoaded, document.fonts ? document.fonts.ready : 0, wait(1600), ...loads]),
+  wait(7000)                                               // batas maksimal supaya tidak menunggu terlalu lama
+]).then(() => {
+  finished = true; clearInterval(tick); setP(100);
+  setTimeout(() => {
+    $('#gate').classList.add('go'); document.body.classList.remove('loading');
+    typeText();
+    setTimeout(() => $('#gate').remove(), 900);
+  }, 350);
+});
+</script>
+</body>
+</html>
