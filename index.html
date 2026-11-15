@@ -15,7 +15,7 @@
  --sec:clamp(40px,9vw,100px) clamp(14px,5vw,28px);
  --s1:clamp(6px,1.8vw,10px);--s2:clamp(10px,3vw,16px);--s3:clamp(14px,4.2vw,22px);--s4:clamp(20px,6vw,36px)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;min-width:0}
-html{scroll-behavior:smooth;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 @media(min-width:1200px){html{font-size:17px}}
 @media(min-width:1600px){html{font-size:19px}}
 body{font-family:var(--id);color:var(--ink);background:var(--p4);overflow-x:hidden;line-height:1.5;width:100%;
@@ -41,9 +41,9 @@ h2 .iconify{margin:0 6px}
 @keyframes beat{50%{transform:scale(1.2)}}
 
 /* ===== Progress bar & latar ===== */
-#bar{position:fixed;top:0;left:0;height:6px;width:0;z-index:90;background:linear-gradient(90deg,var(--p3),var(--lav));border-radius:0 6px 6px 0}
-#bg{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
-.fl{position:absolute;bottom:-50px;animation:up linear infinite;opacity:.6}
+#bar{position:fixed;top:0;left:0;height:6px;width:100%;transform:scaleX(0);transform-origin:left;will-change:transform;z-index:90;background:linear-gradient(90deg,var(--p3),var(--lav))}
+#bg{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;contain:strict}
+.fl{position:absolute;bottom:-50px;animation:up linear infinite;opacity:.6;will-change:transform}
 @keyframes up{to{transform:translateY(-120vh) rotate(40deg)}}
 
 /* ===== Hero ===== */
@@ -159,9 +159,9 @@ body.hasmini{padding-bottom:84px}
 .tracks li.act .ti b{color:var(--deep)}
 .td{font-size:clamp(.8rem,3.4vw,.95rem);color:#4a2540;opacity:.85;font-variant-numeric:tabular-nums}
 .eq{display:none;gap:3px;align-items:flex-end;height:16px}
-.eq i{width:4px;background:var(--deep);border-radius:2px;animation:eq .9s ease-in-out infinite;animation-play-state:paused}
+.eq i{width:4px;height:16px;background:var(--deep);border-radius:2px;transform-origin:bottom;transform:scaleY(.3);animation:eq .9s ease-in-out infinite;animation-play-state:paused}
 .eq i:nth-child(2){animation-delay:-.3s}.eq i:nth-child(3){animation-delay:-.6s}
-@keyframes eq{0%,100%{height:4px}50%{height:16px}}
+@keyframes eq{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
 .tracks li.act .tn span{display:none}.tracks li.act .eq{display:flex}   /* lagu aktif: angka diganti bar equalizer */
 body.mplay .eq i{animation-play-state:running}                          /* bar bergerak hanya saat musik diputar */
 /* mini player di bawah layar */
@@ -171,31 +171,46 @@ body.fullopen #mini{transform:translate(-50%,170%)}
 #mini .tcv{width:46px;height:46px;border-radius:8px}
 #mini button{border:0;background:none;color:#fff;font-size:1.8rem;width:46px;height:46px;display:grid;place-items:center;cursor:pointer;border-radius:50%;flex:none}
 .mbar{position:absolute;left:12px;right:12px;bottom:3px;height:3px;background:rgba(255,255,255,.3);border-radius:3px;overflow:hidden}
-.mbar i{display:block;height:100%;width:0;background:#fff}
+.mbar i{display:block;height:100%;width:100%;background:#fff;transform:scaleX(0);transform-origin:left}
 /* layar pemutar penuh (tema terang) */
 #full{position:fixed;inset:0;z-index:97;color:#4a2540;transform:translateY(100%);visibility:hidden;transition:transform .5s cubic-bezier(.3,.9,.3,1),visibility 0s .5s;background:linear-gradient(180deg,var(--p1) 0%,#f3e6f8 50%,#dacdf0 100%);overflow:hidden}
 #full.on{transform:none;visibility:visible;transition:transform .5s cubic-bezier(.3,.9,.3,1)}
-.fwrap{position:relative;width:min(520px,100%);height:100%;margin:0 auto;display:flex;flex-direction:column;padding:max(14px,env(safe-area-inset-top)) clamp(20px,7vw,32px) max(22px,env(safe-area-inset-bottom));overflow-y:auto}
+/* ================= ATUR JARAK PEMUTAR PENUH DI SINI =================
+   Urutan dari atas ke bawah: [atas] judul playlist [judul-cover] cover [cover-lagu] judul lagu [lagu-bar] bar progres [bar-tombol] tombol [bawah]
+   Sisa tinggi layar dibagi ke semua jarak sesuai BOBOT di bawah: makin besar angkanya, makin lebar jarak itu.
+   Karena dibagi proporsional, tampilannya tetap rapi di layar pendek maupun tinggi. */
+#full{
+  --j-w-atas:        2;      /* bobot: ruang di atas judul playlist */
+  --j-w-judul-cover: 1.4;    /* bobot: judul playlist -> cover */
+  --j-w-cover-lagu:  1;      /* bobot: cover -> judul lagu */
+  --j-w-lagu-bar:    1.2;    /* bobot: judul lagu -> bar progres */
+  --j-w-bar-tombol:  1;      /* bobot: bar progres -> tombol kontrol */
+  --j-w-bawah:       2;      /* bobot: ruang di bawah tombol kontrol */
+  --j-min:           clamp(4px,1vh,12px);   /* jarak paling kecil antar bagian (di layar sangat pendek) */
+  --j-cover-maks:    44vh;                  /* ukuran maksimal cover (persegi); kecilkan kalau ingin lebih lega */
+  --j-samping:       clamp(20px,7vw,32px);  /* jarak kiri & kanan */
+}
+.fwrap{position:relative;width:min(520px,100%);height:100%;margin:0 auto;display:flex;flex-direction:column;padding:env(safe-area-inset-top) var(--j-samping) env(safe-area-inset-bottom);overflow-y:auto}
+.sp{display:block;flex:0 1 0;min-height:var(--j-min)}   /* penyekat jarak: ukurannya dibagi sesuai bobot */
 .ftop{display:flex;align-items:center;gap:8px;text-align:center}
 .ftop button{border:0;background:none;color:#4a2540;font-size:1.8rem;width:44px;height:44px;display:grid;place-items:center;cursor:pointer;flex:none}
 .ftop>div{flex:1;min-width:0}
 .ftop small{display:block;font-size:.85rem;opacity:.8}
 .ftop b{display:block;font-size:1.1rem;overflow-wrap:anywhere}
-.fcw{flex:1 1 0;min-height:clamp(110px,24vh,200px);display:flex;align-items:center;justify-content:center;padding:clamp(8px,2.2vh,26px) 0}
-.fcover{position:relative;flex:none;width:min(100%,420px,40vh);aspect-ratio:1;border-radius:clamp(16px,5vw,22px);background:linear-gradient(135deg,var(--p3),var(--lav));display:grid;place-items:center;font-size:clamp(3rem,12vw,5rem);color:#fff;overflow:hidden;box-shadow:0 clamp(10px,2.4vh,18px) clamp(24px,5vh,40px) rgba(205,120,160,.45)}
-@supports (width:1cqw){.fcw{container-type:size}.fcover{width:min(100cqw,100cqh,420px)}}   /* cover memenuhi sisa ruang, tetap persegi */
+.fcw{flex:none;display:flex;justify-content:center}
+.fcover{position:relative;width:min(100%,420px,var(--j-cover-maks));aspect-ratio:1;border-radius:clamp(16px,5vw,22px);background:linear-gradient(135deg,var(--p3),var(--lav));display:grid;place-items:center;font-size:clamp(3rem,12vw,5rem);color:#fff;overflow:hidden;box-shadow:0 clamp(10px,2.4vh,18px) clamp(24px,5vh,40px) rgba(205,120,160,.45)}
 .frow{display:flex;align-items:center;gap:10px}
 .frow .ti b{font-size:clamp(1.2rem,min(5.6vw,3.4vh),1.9rem);white-space:normal;overflow:visible;text-overflow:clip;line-height:1.15;color:#3d1d33}
 .frow .ti span{font-size:clamp(.9rem,2.8vw,1.05rem);opacity:.75;margin-top:4px}
 #bLike{border:0;background:none;color:#4a2540;font-size:1.9rem;width:48px;height:48px;display:grid;place-items:center;cursor:pointer;flex:none}
 #bLike .h1{display:none}#bLike.on .h1{display:block}#bLike.on .h0{display:none}
 #bLike.on{color:#ff6fa5;animation:beat .5s}
-.prog{display:flex;align-items:center;gap:var(--s1);margin-top:clamp(10px,2.6vh,20px);font-size:.85rem;font-variant-numeric:tabular-nums}
+.prog{display:flex;align-items:center;gap:var(--s1);font-size:.85rem;font-variant-numeric:tabular-nums}
 .seek{flex:1;height:24px;display:flex;align-items:center;cursor:pointer;touch-action:none}
 .seek div{position:relative;width:100%;height:6px;background:rgba(122,74,99,.18);border-radius:6px}
 .seek i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--deep);border-radius:6px}
 .seek i::after{content:"";position:absolute;right:-8px;top:-5px;width:16px;height:16px;border-radius:50%;background:var(--deep);box-shadow:0 0 0 3px #fff}
-.ctl{--sm:clamp(34px,min(6.2vh,11vw),44px);--rd:clamp(40px,min(7.2vh,14vw),54px);--pp:clamp(56px,min(10.5vh,20vw),78px);display:flex;align-items:center;justify-content:center;gap:clamp(6px,2.4vw,16px);margin-top:clamp(10px,2.4vh,18px)}
+.ctl{--sm:clamp(34px,min(6.2vh,11vw),44px);--rd:clamp(40px,min(7.2vh,14vw),54px);--pp:clamp(56px,min(10.5vh,20vw),78px);display:flex;align-items:center;justify-content:center;gap:clamp(6px,2.4vw,16px)}
 .ctl button{border:0;background:none;color:#4a2540;cursor:pointer;display:grid;place-items:center;border-radius:50%;transition:.2s}
 .ctl button:active{transform:scale(.9)}
 .ctl .sm{width:var(--sm);height:var(--sm);font-size:calc(var(--sm) * .5)}
@@ -203,9 +218,6 @@ body.fullopen #mini{transform:translate(-50%,170%)}
 .ctl .pp{width:var(--pp);height:var(--pp);font-size:calc(var(--pp) * .5);background:#ff8cb8;box-shadow:0 6px 0 #5c3249}
 .ctl .pp:active{transform:translateY(4px);box-shadow:0 2px 0 #5c3249}
 .ctl .on{color:var(--deep);background:var(--p1)}
-.fmsg{margin-top:clamp(12px,2.8vh,22px);text-align:center;font-family:var(--kr);font-weight:700;font-size:clamp(1.2rem,4.5vw,1.5rem);color:var(--deep);overflow-wrap:anywhere}
-.fmsg:empty{display:none}
-
 /* ===== Penutup ===== */
 #end{text-align:center;min-height:80vh;min-height:80dvh;display:flex;flex-direction:column;justify-content:center;align-items:center}
 #end h2{font-family:var(--kr);font-size:clamp(3.4rem,17vw,7rem);font-weight:700;margin:0;text-shadow:3px 3px 0 #fff,6px 6px 0 var(--p2);color:var(--p3)}
@@ -260,14 +272,14 @@ footer{position:relative;z-index:2;text-align:center;padding:12px 16px 32px;font
       <button class="gsel" id="gsel" aria-haspopup="true" aria-expanded="false" aria-label="Pilih puzzle"><b id="gnum">1</b><span class="iconify" data-icon="ph:caret-down-bold"></span></button>
       <div class="gpop" id="gpop" role="menu"></div>
     </div>
-    <div class="pz" id="gboard"><div class="pb"><img id="gphoto" alt=""></div><div class="pcv" id="gcover"></div><div class="gl"></div></div>
+    <div class="pz" id="gboard"><div class="pb"><img id="gphoto" alt="" decoding="async"></div><div class="pcv" id="gcover"></div><div class="gl"></div></div>
     <div class="bt" id="gtray"></div>
   </div>
 </section>
 <!-- Layar "Puzzle selesai" -->
 <div id="gwo" aria-hidden="true"><div class="gwi">
   <h3>PUZZLE SELESAI!</h3>
-  <div class="gpol"><div class="gph"><img id="gwimg" alt=""></div><p id="gwcap"></p></div>
+  <div class="gpol"><div class="gph"><img id="gwimg" alt="" decoding="async"></div><p id="gwcap"></p></div>
   <div id="gwmsg"></div>
   <button class="gnext" id="gnext">Lanjut foto berikutnya</button>
   <button class="gcl" id="gclose">Tutup</button>
@@ -287,13 +299,18 @@ footer{position:relative;z-index:2;text-align:center;padding:12px 16px 32px;font
 <!-- Pemutar layar penuh -->
 <div id="full" aria-hidden="true">
   <div class="fwrap">
+    <i class="sp" style="flex-grow:var(--j-w-atas)"></i>
     <div class="ftop"><button id="fClose" aria-label="Tutup"><span class="iconify" data-icon="ph:caret-down-fill"></span></button><div><small>Memainkan dari Playlist</small><b id="fpn"></b></div><span style="width:44px;flex:none"></span></div>
+    <i class="sp" style="flex-grow:var(--j-w-judul-cover)"></i>
     <div class="fcw"><div class="fcover"><span class="iconify" data-icon="ph:music-notes-fill"></span><span class="ci" id="fimg"></span></div></div>
+    <i class="sp" style="flex-grow:var(--j-w-cover-lagu)"></i>
     <div class="frow">
       <div class="ti"><b id="nt"></b><span id="na"></span></div>
       <button id="bLike" aria-label="Suka"><span class="iconify h0" data-icon="ph:heart-bold"></span><span class="iconify h1" data-icon="ph:heart-fill"></span></button>
     </div>
+    <i class="sp" style="flex-grow:var(--j-w-lagu-bar)"></i>
     <div class="prog"><span id="tcur">0:00</span><div class="seek" id="seek"><div><i id="sf"></i></div></div><span id="ttot">0:00</span></div>
+    <i class="sp" style="flex-grow:var(--j-w-bar-tombol)"></i>
     <div class="ctl">
       <button class="sm" id="bShuf" aria-label="Acak lagu"><span class="iconify" data-icon="ph:shuffle-bold"></span></button>
       <button class="rd" id="bPrev" aria-label="Sebelumnya"><span class="iconify" data-icon="ph:skip-back-fill"></span></button>
@@ -301,7 +318,7 @@ footer{position:relative;z-index:2;text-align:center;padding:12px 16px 32px;font
       <button class="rd" id="bNext" aria-label="Berikutnya"><span class="iconify" data-icon="ph:skip-forward-fill"></span></button>
       <button class="sm" id="bRep" aria-label="Ulangi lagu"><span class="iconify" data-icon="ph:repeat-bold"></span></button>
     </div>
-    <div class="fmsg" id="fmsg"></div>
+    <i class="sp" style="flex-grow:var(--j-w-bawah)"></i>
   </div>
 </div>
 <audio id="au" preload="auto" playsinline></audio>
@@ -323,14 +340,13 @@ const config = {
      Taruh file lagu sefolder dengan index.html lalu isi namanya di src.
      title = judul lagu, artist = penyanyi
      cover = gambar sampul (opsional, mis. "cover1.jpg"; "" = sampul pink bawaan)
-     msg   = kalimat manis dari kamu yang tampil besar di layar pemutar (tulis sendiri, bukan lirik)
      Kosongkan playlist ( [] ) kalau tidak mau bagian musik. */
   playlistName: "Lagu Kesukaanku",
   playlist: [
-    {src:"ohmy.mp3", title:"Oh My Angel", artist:"Bertha Tillman", cover:"my.jpg", msg:""},
-    {src:"shp.mp3", title:"Shape Of My Heart", artist:"Backstreet Boys", cover:"shp.jpg", msg:""},
-    {src:"byy.mp3", title:"honeybee", artist:"Olivia Rodrigo", cover:"by.jpg", msg:""},
-    {src:"abtu.mp3", title:"About You", artist:"The 1975", cover:"abt.jpg", msg:""}
+    {src:"ohmy.mp3", title:"Oh My Angel", artist:"Bertha Tillman", cover:"my.jpg"},
+    {src:"shp.mp3", title:"Shape Of My Heart", artist:"Backstreet Boys", cover:"shp.jpg"},
+    {src:"byy.mp3", title:"honeybee", artist:"Olivia Rodrigo", cover:"by.jpg"},
+    {src:"abtu.mp3", title:"About You", artist:"The 1975", cover:"abt.jpg"}
   ],
   shuffle: false,        // true = mulai dengan mode acak
 
@@ -394,7 +410,7 @@ config.photos.forEach((f, i) => {
   // src kosong → foto acak picsum; kalau foto gagal dimuat → ikon kamera
   const src = f.src || `https://picsum.photos/seed/kenangan${i}/500/500`;
   p.innerHTML = `<div class="ph">${ic('ph:camera-fill')}</div><p>${f.caption}</p>`;
-  const img = new Image(); img.alt = f.caption;
+  const img = new Image(); img.alt = f.caption; img.decoding = 'async';
   loads.push(new Promise(res => {
     img.onload = () => { const b = p.querySelector('.ph'); b.innerHTML = ''; b.appendChild(img); res(); };
     img.onerror = res;
@@ -558,15 +574,22 @@ document.querySelectorAll('h2').forEach(h => h.classList.add('rv', 'fade'));
 document.querySelectorAll('.rv,.pol').forEach(el => io.observe(el));
 
 /* ============ Progress bar + parallax (hanya di area hero) ============ */
-addEventListener('scroll', () => {
-  const h = document.documentElement;
-  $('#bar').style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%';
-  if (!rm && scrollY < innerHeight * 1.5) document.querySelectorAll('.deco').forEach(el => el.style.transform = `translateY(${scrollY * el.dataset.s}px)`);
-}, {passive: true});
+// dibatasi 1x per frame dan memakai transform, supaya scroll tetap ringan
+const bar = $('#bar'), decos = [...document.querySelectorAll('.deco')];
+let maxScroll = 1, ticking = false;
+const calcMax = () => { const h = document.documentElement; maxScroll = Math.max(1, h.scrollHeight - h.clientHeight); };
+calcMax(); addEventListener('resize', calcMax);
+if (window.ResizeObserver) new ResizeObserver(calcMax).observe(document.body);
+function onScroll(){
+  ticking = false;
+  bar.style.transform = `scaleX(${Math.min(1, scrollY / maxScroll)})`;
+  if (!rm && scrollY < innerHeight * 1.5) decos.forEach(el => el.style.transform = `translate3d(0,${scrollY * el.dataset.s}px,0)`);
+}
+addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, {passive: true});
 
 /* ============ Partikel latar ============ */
 const floaters = ['fluent-emoji-flat:sparkling-heart','fluent-emoji-flat:star','fluent-emoji-flat:sparkles','fluent-emoji-flat:cherry-blossom','fluent-emoji-flat:cloud','fluent-emoji-flat:heart-suit'];
-for (let i = 0; i < (innerWidth < 600 ? 9 : 16); i++) {
+for (let i = 0; i < (innerWidth < 600 ? 6 : 12); i++) {
   const f = mk('span', 'fl', ic(floaters[i % floaters.length]));
   f.style.cssText = `left:${Math.random() * 100}%;font-size:${18 + Math.random() * 20}px;animation-duration:${16 + Math.random() * 16}s;animation-delay:-${Math.random() * 24}s`;
   $('#bg').appendChild(f);
@@ -618,10 +641,9 @@ function setTrack(i){
   ['#nt', '#mt'].forEach(q => $(q).textContent = ti);
   ['#na', '#ma'].forEach(q => $(q).textContent = t.artist || '');
   ['#fimg', '#mimg'].forEach(q => $(q).innerHTML = cvr(t.cover));
-  $('#fmsg').textContent = t.msg || '';
   $('#bLike').classList.toggle('on', !!liked[i]);
-    rows.forEach((r, k) => r.classList.toggle('act', started && k === i));
-  ['#sf', '#mf'].forEach(q => $(q).style.width = '0');
+  rows.forEach((r, k) => r.classList.toggle('act', started && k === i));
+  $('#sf').style.width = '0'; $('#mf').style.transform = 'scaleX(0)';
   $('#tcur').textContent = '0:00'; $('#ttot').textContent = '0:00';
 }
 function play(i){
@@ -639,7 +661,13 @@ function toggle(){
   else if (au.paused) play();
   else au.pause();
 }
-function openFull(){ full.classList.add('on'); full.setAttribute('aria-hidden', 'false'); B.classList.add('lock', 'fullopen'); }
+function updProg(){                                          // bar progres: mini player selalu, layar penuh hanya saat terbuka
+  if (!au.duration) return;
+  const r = au.currentTime / au.duration;
+  $('#mf').style.transform = `scaleX(${r})`;
+  if (B.classList.contains('fullopen')) { $('#sf').style.width = r * 100 + '%'; $('#tcur').textContent = fmt(au.currentTime); }
+}
+function openFull(){ full.classList.add('on'); full.setAttribute('aria-hidden', 'false'); B.classList.add('lock', 'fullopen'); updProg(); }
 function closeFull(){ full.classList.remove('on'); full.setAttribute('aria-hidden', 'true'); B.classList.remove('lock', 'fullopen'); }
 
 if (!list.length) { $('#music').style.display = 'none'; }
@@ -650,7 +678,7 @@ else {
       <div class="tcv">${ic('ph:music-notes-fill')}<span class="ci">${cvr(t.cover)}</span></div>
       <div class="ti"><b>${t.title || 'Lagu ' + (i + 1)}</b><span>${t.artist || ''}</span></div>
       <div class="td"></div>`);
-    li.onclick = () => { play(i); openFull(); };           // ketuk lagu → putar + buka layar penuh
+    li.onclick = () => { if (started && i === idx) openFull(); else play(i); };   // ketuk lagu → putar; ketuk lagi / ketuk mini player → buka layar penuh
     $('#tracks').appendChild(li); rows.push(li);
     const a = new Audio(); a.preload = 'metadata';          // ambil durasi tiap lagu (diam jika file belum ada)
     a.onloadedmetadata = () => li.querySelector('.td').textContent = fmt(a.duration);
@@ -690,12 +718,7 @@ else {
   au.onplaying = () => fails = 0;
   au.onended = () => play(nextIdx());                      // lanjut lagu berikutnya; setelah habis ulang dari awal
   au.onloadedmetadata = () => $('#ttot').textContent = fmt(au.duration);
-  au.ontimeupdate = () => {
-    if (!au.duration) return;
-    const p = (au.currentTime / au.duration * 100) + '%';
-    $('#sf').style.width = p; $('#mf').style.width = p;
-    $('#tcur').textContent = fmt(au.currentTime);
-  };
+  au.ontimeupdate = updProg;
   au.onerror = () => {                                     // file tidak ketemu → lewati
     if (!wantPlay) return;
     if (++fails >= list.length) { wantPlay = false; setTrack(0); return; }
